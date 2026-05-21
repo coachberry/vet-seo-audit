@@ -3,21 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>VetSEO Auditor — Veterinary SEO & GEO Intelligence</title>
+<title>VetSEO Auditor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 <div class="grain"></div>
-
-<!-- HEADER -->
 <header class="header">
   <div class="header-inner">
-    <div class="logo">
-      <span class="logo-icon">🐾</span>
-      <span class="logo-text">VetSEO <em>Auditor</em></span>
-    </div>
+    <div class="logo"><span class="logo-icon">🐾</span><span class="logo-text">VetSEO <em>Auditor</em></span></div>
     <nav class="header-nav">
       <button class="nav-btn active" id="navAudit" onclick="showView('audit')">SEO Audit</button>
       <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">Sitemap</button>
@@ -26,12 +21,7 @@
     </nav>
   </div>
 </header>
-
 <main class="main">
-
-  <!-- ══════════════════════════════════════════
-       VIEW: SEO AUDIT
-  ══════════════════════════════════════════ -->
   <div id="viewAudit" class="view active">
     <div class="hero">
       <div class="hero-eyebrow">Veterinary SEO & GEO Intelligence</div>
@@ -42,11 +32,8 @@
       <div class="input-row">
         <input class="url-input" type="url" id="auditUrl" placeholder="https://vetpractice.com"/>
         <div class="input-options">
-          <label class="opt-label">
-            <input type="checkbox" id="crawlSubpages" checked/> Crawl all pages
-          </label>
-          <label class="opt-label">
-            <span>Page limit:</span>
+          <label class="opt-label"><input type="checkbox" id="crawlSubpages" checked/> Crawl all pages</label>
+          <label class="opt-label"><span>Page limit:</span>
             <select class="mini-select" id="pageLimit">
               <option value="25">25</option>
               <option value="50" selected>50</option>
@@ -61,10 +48,6 @@
     </div>
     <div id="auditOutput"></div>
   </div>
-
-  <!-- ══════════════════════════════════════════
-       VIEW: SITEMAP
-  ══════════════════════════════════════════ -->
   <div id="viewSitemap" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Real Crawl-Based Discovery</div>
@@ -79,10 +62,6 @@
     </div>
     <div id="sitemapOutput"></div>
   </div>
-
-  <!-- ══════════════════════════════════════════
-       VIEW: COMPARE
-  ══════════════════════════════════════════ -->
   <div id="viewCompare" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Competitive Intelligence</div>
@@ -101,24 +80,19 @@
     </div>
     <div id="compareOutput"></div>
   </div>
-
-  <!-- ══════════════════════════════════════════
-       VIEW: HISTORY
-  ══════════════════════════════════════════ -->
   <div id="viewHistory" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Audit History</div>
       <h1>Past <em>Reports</em></h1>
       <p class="hero-sub">All saved audits from Firestore. Track progress over time.</p>
     </div>
-    <div id="historyOutput">
-      <div class="loader-wrap"><div class="loader-label">Loading history...</div></div>
-    </div>
+    <div id="historyOutput"><div class="loader-wrap"><div class="loader-label">Loading history...</div></div></div>
   </div>
-
 </main>
-
-<!-- FIREBASE -->
-<script type="module" src="app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
