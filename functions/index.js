@@ -65,7 +65,7 @@ exports.processAudit = functions
         const maxDepth = Math.max(0, ...crawlData.pages.map(p => {
           try { return new URL(p.url).pathname.split('/').filter(Boolean).length; } catch { return 0; }
         }));
-        const sitemapAnalysis = await analyzeSitemap(crawlData, client);
+        const sitemapAnalysis = await (require("./analyzer").analyzeSitemapWithContext || analyzeSitemap)(crawlData, client);
         const issueMap = {};
         (sitemapAnalysis.pageIssues || []).forEach(i => { issueMap[i.url] = i; });
         result = {

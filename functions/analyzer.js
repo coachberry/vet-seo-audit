@@ -390,3 +390,41 @@ function findDuplicates(arr) {
 }
 
 module.exports = { analyzeSite, analyzeSitemap, compareAnalysis };
+
+// Override the analyzeSitemap to add richer issue descriptions
+const _origAnalyzeSitemap = module.exports.analyzeSitemap;
+module.exports.analyzeSitemapWithContext = async function(crawlData, client) {
+  var result = await _origAnalyzeSitemap(crawlData, client);
+
+  // Enrich page issues with context from crawl data
+  var issueMap = {};
+  (result.pageIssues || []).forEach(function(i) { issueMap[i.url] = i; });
+
+  crawlData.pages.forEach(function(page) {
+    if (!issueMap[page.url]) {
+      var issue = null;
+      var recommendation = null;
+      if (page.isOrphan) {
+        issue = 'ORPHAN PAGE — No internal links from any other page on the site point to this URL. ' +
+          'Google and visitors can only reach it via the XML sitemap or direct URL. ' +
+          'Word count: ' + page.wordCount + ' words. Schema present: ' + (page.schemas.length > 0 ? 'Yes' : 'No') + '.';
+        recommendation = 'Add internal links to this page from relevant service pages, the blog index, or the navigation menu. ' +
+          'If this content is outdated or low value, consider unpublishing it or redirecting to a stronger page.';
+      } else if (page.isNoindex) {
+        issue = 'NOINDEX — This page has a robots meta tag telling search engines not to index it. ' +
+          'It will not appear in Google search results.';
+        recommendation = 'Verify this noindex tag is intentional. If this page should rank in search results, remove the noindex directive.';
+      } else if (page.status >= 400) {
+        issue = 'HTTP ' + page.status + ' ERROR — This page returned an error status code. ' +
+          'Search engines cannot index broken pages.';
+        recommendation = 'Fix or redirect this URL. If the page no longer exists, set up a 301 redirect to the most relevant live page.';
+      }
+      if (issue) {
+        if (!result.pageIssues) result.pageIssues = [];
+        result.pageIssues.push({ url: page.url, issue: issue, recommendation: recommendation });
+      }
+    }
+  });
+
+  return result;
+};
