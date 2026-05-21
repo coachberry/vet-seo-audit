@@ -16,6 +16,7 @@
     <nav class="header-nav">
       <button class="nav-btn active" id="navAudit" onclick="showView('audit')">SEO Audit</button>
       <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">Sitemap</button>
+      <button class="nav-btn" id="navBlog" onclick="showView('blog')">Blog Audit</button>
       <button class="nav-btn" id="navCompare" onclick="showView('compare')">Compare</button>
       <button class="nav-btn" id="navHistory" onclick="showView('history')">History</button>
     </nav>
@@ -23,11 +24,12 @@
 </header>
 <main class="main">
 
+  <!-- SEO AUDIT -->
   <div id="viewAudit" class="view active">
     <div class="hero">
       <div class="hero-eyebrow">Veterinary SEO & GEO Intelligence</div>
       <h1>Full-Site <em>SEO Audit</em></h1>
-      <p class="hero-sub">Real HTML crawling. Vet-specific schema analysis. Actionable recommendations.</p>
+      <p class="hero-sub">Real HTML crawling of all service, team, location, and content pages. Blog posts are audited separately in the Blog Audit tab.</p>
     </div>
     <div class="input-card">
       <div class="input-row">
@@ -46,11 +48,12 @@
         </div>
         <button class="btn btn-primary" id="auditBtn" onclick="runAudit()">⚡ RUN AUDIT</button>
       </div>
-      <div class="input-hint">Crawls real HTML — meta tags, schema, headings, links, Open Graph, and more. Higher page limits take longer.</div>
+      <div class="input-hint">Excludes /blog/ pages — use the Blog Audit tab to audit blog content separately.</div>
     </div>
     <div id="auditOutput"></div>
   </div>
 
+  <!-- SITEMAP -->
   <div id="viewSitemap" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Real Crawl-Based Discovery</div>
@@ -73,11 +76,40 @@
         </div>
         <button class="btn btn-primary" id="sitemapBtn" onclick="runSitemap()">🗺 BUILD SITEMAP</button>
       </div>
-      <div class="input-hint">Higher limits = more complete sitemap but longer crawl time. "No limit" may take 10+ minutes for large sites.</div>
+      <div class="input-hint">Includes ALL pages — blog posts, service pages, team pages, everything. Higher limits take longer.</div>
     </div>
     <div id="sitemapOutput"></div>
   </div>
 
+  <!-- BLOG AUDIT -->
+  <div id="viewBlog" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Blog Content Intelligence</div>
+      <h1>Blog <em>Audit</em></h1>
+      <p class="hero-sub">Audits every page with /blog/ in the URL. Scores content quality, E-E-A-T, GEO readiness, schema, and more — post by post.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="blogUrl" placeholder="https://vetpractice.com"/>
+        <div class="input-options">
+          <label class="opt-label"><span>Post limit:</span>
+            <select class="mini-select" id="blogPageLimit">
+              <option value="50">50 posts</option>
+              <option value="100" selected>100 posts</option>
+              <option value="200">200 posts</option>
+              <option value="500">500 posts</option>
+              <option value="9999">No limit</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="blogBtn" onclick="runBlogAudit()">📝 AUDIT BLOGS</button>
+      </div>
+      <div class="input-hint">Only crawls pages with /blog/ in the URL. Shows word count, author, publish date, inbound links, and full SEO scores per post.</div>
+    </div>
+    <div id="blogOutput"></div>
+  </div>
+
+  <!-- COMPARE -->
   <div id="viewCompare" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Competitive Intelligence</div>
@@ -97,6 +129,7 @@
     <div id="compareOutput"></div>
   </div>
 
+  <!-- HISTORY -->
   <div id="viewHistory" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Audit History</div>
@@ -116,6 +149,7 @@
 <script src="js/history.js"></script>
 <script src="js/audit.js"></script>
 <script src="js/sitemap.js"></script>
+<script src="js/blog.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/compare.js"></script>
 </body>
