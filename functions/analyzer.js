@@ -13,7 +13,7 @@ const VET_RECOMMENDED_SCHEMA = [
 async function analyzePage(pageData, client) {
   const prompt = buildPagePrompt(pageData);
   const msg = await client.messages.create({
-    model: 'claude-opus-4-5',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 3000,
     system: buildSystemPrompt(),
     messages: [{ role: 'user', content: prompt }]
@@ -73,7 +73,7 @@ async function analyzeSiteWide(crawlData, analyzedPages, client) {
     avgScores: computeAverages(analyzedPages)
   };
   const msg = await client.messages.create({
-    model: 'claude-opus-4-5', max_tokens: 2000, system: buildSystemPrompt(),
+    model: 'claude-haiku-4-5-20251001', max_tokens: 2000, system: buildSystemPrompt(),
     messages: [{ role: 'user', content: `Audit ${domain} veterinary website. Respond JSON only:
 {"overallFindings":"string","topPriorities":[{"action":"string","impact":"HIGH|MEDIUM|LOW","effort":"HIGH|MEDIUM|LOW","category":"string"}],"quickWins":["string"],"localSEOFindings":"string","contentStrategy":"string","schemaStrategy":"string","geoAIStrategy":"string"}
 Data: ${JSON.stringify(summary)}` }]
@@ -90,7 +90,7 @@ async function analyzeSitemap(crawlData, client) {
     pageTitle: p.pageTitle||'', wordCount: p.wordCount||0
   }));
   const msg = await client.messages.create({
-    model: 'claude-opus-4-5', max_tokens: 3000, system: buildSystemPrompt(),
+    model: 'claude-haiku-4-5-20251001', max_tokens: 3000, system: buildSystemPrompt(),
     messages: [{ role: 'user', content: `Veterinary SEO expert auditing sitemap of ${domain}. ${pages.length} non-blog pages crawled.
 
 Respond JSON only:
@@ -109,7 +109,7 @@ async function compareAnalysis(site1Data, site2Data, client) {
     site2: { domain: site2Data.domain, averages: site2Data.siteAverages, totalPages: site2Data.totalPagesCrawled }
   };
   const msg = await client.messages.create({
-    model: 'claude-opus-4-5', max_tokens: 2500, system: buildSystemPrompt(),
+    model: 'claude-haiku-4-5-20251001', max_tokens: 2500, system: buildSystemPrompt(),
     messages: [{ role: 'user', content: `Veterinary SEO competitive analysis. Respond JSON only:
 {"overallWinner":"site1|site2","categoryWinners":{"overallSEO":"site1|site2","localSEO":"site1|site2","schemaStructuredData":"site1|site2","geoAIReadiness":"site1|site2","contentQuality":"site1|site2","technicalSEO":"site1|site2","eeAt":"site1|site2"},"site1Advantages":["string"],"site2Advantages":["string"],"summary":"3 paragraphs","recommendations":["string"]}
 Data: ${JSON.stringify(summary)}` }]
