@@ -22,6 +22,7 @@
   </div>
 </header>
 <main class="main">
+
   <div id="viewAudit" class="view active">
     <div class="hero">
       <div class="hero-eyebrow">Veterinary SEO & GEO Intelligence</div>
@@ -35,21 +36,21 @@
           <label class="opt-label"><input type="checkbox" id="crawlSubpages" checked/> Crawl all pages</label>
           <label class="opt-label"><span>Page limit:</span>
             <select class="mini-select" id="pageLimit">
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100" selected>100</option>
-              <option value="150">150</option>
-              <option value="200">200</option>
-              <option value="200">200</option>
+              <option value="25">25 pages</option>
+              <option value="50">50 pages</option>
+              <option value="100" selected>100 pages</option>
+              <option value="200">200 pages</option>
+              <option value="500">500 pages</option>
             </select>
           </label>
         </div>
         <button class="btn btn-primary" id="auditBtn" onclick="runAudit()">⚡ RUN AUDIT</button>
       </div>
-      <div class="input-hint">Crawls real HTML — meta tags, schema, headings, links, Open Graph, and more.</div>
+      <div class="input-hint">Crawls real HTML — meta tags, schema, headings, links, Open Graph, and more. Higher page limits take longer.</div>
     </div>
     <div id="auditOutput"></div>
   </div>
+
   <div id="viewSitemap" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Real Crawl-Based Discovery</div>
@@ -59,11 +60,24 @@
     <div class="input-card">
       <div class="input-row">
         <input class="url-input" type="url" id="sitemapUrl" placeholder="https://vetpractice.com"/>
+        <div class="input-options">
+          <label class="opt-label"><span>Page limit:</span>
+            <select class="mini-select" id="sitemapPageLimit">
+              <option value="100">100 pages</option>
+              <option value="200">200 pages</option>
+              <option value="500" selected>500 pages</option>
+              <option value="1000">1000 pages</option>
+              <option value="9999">No limit</option>
+            </select>
+          </label>
+        </div>
         <button class="btn btn-primary" id="sitemapBtn" onclick="runSitemap()">🗺 BUILD SITEMAP</button>
       </div>
+      <div class="input-hint">Higher limits = more complete sitemap but longer crawl time. "No limit" may take 10+ minutes for large sites.</div>
     </div>
     <div id="sitemapOutput"></div>
   </div>
+
   <div id="viewCompare" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Competitive Intelligence</div>
@@ -82,14 +96,16 @@
     </div>
     <div id="compareOutput"></div>
   </div>
+
   <div id="viewHistory" class="view">
     <div class="hero">
       <div class="hero-eyebrow">Audit History</div>
       <h1>Past <em>Reports</em></h1>
-      <p class="hero-sub">All saved audits from Firestore. Track progress over time.</p>
+      <p class="hero-sub">All saved audits from Firestore. Click to reload. Delete to remove permanently.</p>
     </div>
     <div id="historyOutput"><div class="loader-wrap"><div class="loader-label">Loading history...</div></div></div>
   </div>
+
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
