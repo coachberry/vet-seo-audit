@@ -287,6 +287,8 @@ async function crawlSite(rootUrl, options) {
   var inboundLinks = {};
 
   function shouldInclude(url) {
+    if (options.servicesOnly) return /\/services\//i.test(url) && !/\/blog\//i.test(url);
+    if (options.coreOnly) return !/\/services\//i.test(url) && !/\/blog\//i.test(url);
     if (blogOnly) return isBlogUrl(url);
     if (filterBlogs) return !isBlogUrl(url);
     return true;
@@ -373,3 +375,7 @@ async function crawlSite(rootUrl, options) {
 
 function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
 module.exports = { crawlSite: crawlSite, buildHierarchy: buildHierarchy, classifyPage: classifyPage, isBlogUrl: isBlogUrl };
+
+// Patch shouldInclude to handle new modes
+// This is appended — the crawlSite function already has filterBlogs/blogOnly
+// We need to update crawlSite's shouldInclude logic

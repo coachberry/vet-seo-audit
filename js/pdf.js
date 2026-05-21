@@ -238,3 +238,64 @@ function buildPDF(type, data) {
     console.error('PDF error:', e);
   }
 }
+
+// Overview PDF — append to existing buildPDF
+var _origBuildPDF = buildPDF;
+buildPDF = function(type, data) {
+  if (type !== 'overview') { _origBuildPDF(type, data); return; }
+  try {
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var W = doc.internal.pageSize.getWidth();
+    var H = doc.internal.pageSize.getHeight();
+    var margin = 14;
+    var y = 0;
+    function checkPage(n) { if (y+(n||10)>H-margin) { doc.addPage(); y=margin+5; } }
+    function txt(text, color, size) {
+      if (!text) return;
+      color=color||[200,200,210]; size=size||7.5;
+      doc.setFontSize(size); doc.setFont('helvetica','normal'); doc.setTextColor(color[0],color[1],color[2]);
+      var lines=doc.splitTextToSize(String(text),W-margin*2);
+      checkPage(lines.length*3.5+2); doc.text(lines,margin,y); y+=lines.length*3.5+2;
+    }
+    function head(t) { checkPage(10); doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(157,150,250); doc.text(t.toUpperCase(),margin,y); y+=5; }
+
+    doc.setFillColor(7,8,15); doc.rect(0,0,W,32,'F');
+    doc.setTextColor(157,150,250); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('VetSEO AUDITOR',W/2,10,{align:'center'});
+    doc.setTextColor(232,233,245); doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('SEO Overview Report',W/2,20,{align:'center'});
+    doc.setFontSize(8); doc.setTextColor(126,128,160); doc.setFont('helvetica','normal');
+    doc.text((data.domain||'')+ ' · '+new Date().toLocaleDateString(),W/2,28,{align:'center'});
+    y=38;
+
+    var scores=data.scores||{};
+    var cats=[{k:'overallSEO',l:'Overall SEO'},{k:'localSEO',l:'Local SEO'},{k:'schemaStructuredData',l:'Schema'},{k:'contentQuality',l:'Content'},{k:'technicalSEO',l:'Technical'},{k:'geoAIReadiness',l:'GEO & AI'},{k:'eeAt',l:'E-E-A-T'}];
+    var cw=(W-margin*2-(cats.length-1)*2)/cats.length;
+    cats.forEach(function(c,i) {
+      var v=Math.round(scores[c.k]||0);
+      var rgb=v>=80?[31,217,160]:v>=55?[245,166,35]:[240,107,107];
+      doc.setFillColor(15,16,24); doc.roundedRect(margin+i*(cw+2),y,cw,16,1.5,1.5,'F');
+      doc.setFontSize(5.5); doc.setTextColor(126,128,160); doc.setFont('helvetica','normal');
+      doc.text(c.l.toUpperCase(),margin+i*(cw+2)+cw/2,y+5.5,{align:'center',maxWidth:cw-2});
+      doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(rgb[0],rgb[1],rgb[2]);
+      doc.text(String(v),margin+i*(cw+2)+cw/2,y+13,{align:'center'});
+    });
+    y+=22;
+
+    head('Overall Findings'); txt(data.overallFindings);
+    y+=3; head('Top Priorities');
+    (data.topPriorities||[]).forEach(function(p,i) {
+      if(!p) return;
+      txt((i+1)+'. '+p.action+' ['+p.impact+' IMPACT, '+p.effort+' EFFORT — '+p.category+']');
+    });
+    y+=3; head('Quick Wins');
+    (data.quickWins||[]).forEach(function(w) { txt('• '+w,[31,217,160]); });
+    y+=3; head('Local SEO'); txt(data.localSEOFindings);
+    y+=3; head('Content Strategy'); txt(data.contentStrategy);
+    y+=3; head('Schema Strategy'); txt(data.schemaStrategy);
+    y+=3; head('GEO & AI Strategy'); txt(data.geoAIStrategy);
+
+    doc.save('vetseo-overview-'+(data.domain||'report')+'.pdf');
+  } catch(e) { alert('PDF error: '+e.message); }
+};

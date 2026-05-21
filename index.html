@@ -14,43 +14,112 @@
   <div class="header-inner">
     <div class="logo"><span class="logo-icon">🐾</span><span class="logo-text">VetSEO <em>Auditor</em></span></div>
     <nav class="header-nav">
-      <button class="nav-btn active" id="navAudit" onclick="showView('audit')">SEO Audit</button>
-      <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">Sitemap</button>
-      <button class="nav-btn" id="navBlog" onclick="showView('blog')">Blog Audit</button>
-      <button class="nav-btn" id="navCompare" onclick="showView('compare')">Compare</button>
-      <button class="nav-btn" id="navHistory" onclick="showView('history')">History</button>
+      <button class="nav-btn active" id="navOverview" onclick="showView('overview')">🏠 Overview</button>
+      <button class="nav-btn" id="navServices" onclick="showView('services')">🔧 Services</button>
+      <button class="nav-btn" id="navBlog" onclick="showView('blog')">📝 Blog</button>
+      <button class="nav-btn" id="navSitepages" onclick="showView('sitepages')">📄 Site Pages</button>
+      <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">🗺 Sitemap</button>
+      <button class="nav-btn" id="navHistory" onclick="showView('history')">📋 History</button>
     </nav>
   </div>
 </header>
 <main class="main">
 
-  <!-- SEO AUDIT -->
-  <div id="viewAudit" class="view active">
+  <!-- OVERVIEW -->
+  <div id="viewOverview" class="view active">
     <div class="hero">
-      <div class="hero-eyebrow">Veterinary SEO & GEO Intelligence</div>
-      <h1>Full-Site <em>SEO Audit</em></h1>
-      <p class="hero-sub">Real HTML crawling of all service, team, location, and content pages. Blog posts are audited separately in the Blog Audit tab.</p>
+      <div class="hero-eyebrow">Site-Wide SEO Intelligence</div>
+      <h1>SEO <em>Overview</em></h1>
+      <p class="hero-sub">Fast site-wide scoring across 7 categories. No page-by-page analysis — just scores, priorities, and quick wins in under 2 minutes.</p>
     </div>
     <div class="input-card">
       <div class="input-row">
-        <input class="url-input" type="url" id="auditUrl" placeholder="https://vetpractice.com"/>
+        <input class="url-input" type="url" id="overviewUrl" placeholder="https://vetpractice.com"/>
+        <button class="btn btn-primary" id="overviewBtn" onclick="runOverview()">🏠 RUN OVERVIEW</button>
+      </div>
+      <div class="input-hint">Crawls up to 50 pages for signals only — no deep page analysis. Returns in ~90 seconds.</div>
+    </div>
+    <div id="overviewOutput"></div>
+  </div>
+
+  <!-- SERVICES AUDIT -->
+  <div id="viewServices" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Service Page Intelligence</div>
+      <h1>Services <em>Audit</em></h1>
+      <p class="hero-sub">Deep audit of every page under /services/ — excluding blog posts. Schema, metadata, content quality, and local SEO scored per page.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="servicesUrl" placeholder="https://vetpractice.com"/>
         <div class="input-options">
-          <label class="opt-label"><input type="checkbox" id="crawlSubpages" checked/> Crawl all pages</label>
-          <label class="opt-label"><span>Page limit:</span>
-            <select class="mini-select" id="pageLimit">
+          <label class="opt-label"><span>Limit:</span>
+            <select class="mini-select" id="servicesLimit">
               <option value="25">25 pages</option>
-              <option value="50">50 pages</option>
-              <option value="100" selected>100 pages</option>
-              <option value="200">200 pages</option>
-              <option value="500">500 pages</option>
+              <option value="50" selected>50 pages</option>
+              <option value="100">100 pages</option>
+              <option value="9999">No limit</option>
             </select>
           </label>
         </div>
-        <button class="btn btn-primary" id="auditBtn" onclick="runAudit()">⚡ RUN AUDIT</button>
+        <button class="btn btn-primary" id="servicesBtn" onclick="runServices()">🔧 AUDIT SERVICES</button>
       </div>
-      <div class="input-hint">Excludes /blog/ pages — use the Blog Audit tab to audit blog content separately.</div>
+      <div class="input-hint">Only crawls URLs containing /services/ and excludes any with /blog/.</div>
     </div>
-    <div id="auditOutput"></div>
+    <div id="servicesOutput"></div>
+  </div>
+
+  <!-- BLOG AUDIT -->
+  <div id="viewBlog" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Blog Content Intelligence</div>
+      <h1>Blog <em>Audit</em></h1>
+      <p class="hero-sub">Audits every page with /blog/ in the URL. Content quality, E-E-A-T, GEO readiness, and schema scored per post.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="blogUrl" placeholder="https://vetpractice.com"/>
+        <div class="input-options">
+          <label class="opt-label"><span>Limit:</span>
+            <select class="mini-select" id="blogPageLimit">
+              <option value="25">25 posts</option>
+              <option value="50" selected>50 posts</option>
+              <option value="100">100 posts</option>
+              <option value="9999">No limit</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="blogBtn" onclick="runBlogAudit()">📝 AUDIT BLOGS</button>
+      </div>
+      <div class="input-hint">Only crawls pages with /blog/ in the URL. Shows word count, author, publish date, and inbound links per post.</div>
+    </div>
+    <div id="blogOutput"></div>
+  </div>
+
+  <!-- SITE PAGES AUDIT -->
+  <div id="viewSitepages" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Core Pages Intelligence</div>
+      <h1>Site Pages <em>Audit</em></h1>
+      <p class="hero-sub">Deep audit of homepage, about, contact, team, booking, and all other core pages — excludes /services/ and /blog/.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="sitepagesUrl" placeholder="https://vetpractice.com"/>
+        <div class="input-options">
+          <label class="opt-label"><span>Limit:</span>
+            <select class="mini-select" id="sitepagesLimit">
+              <option value="25" selected>25 pages</option>
+              <option value="50">50 pages</option>
+              <option value="100">100 pages</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="sitepagesBtn" onclick="runSitepages()">📄 AUDIT SITE PAGES</button>
+      </div>
+      <div class="input-hint">Excludes /services/ and /blog/ — focuses on homepage, about, contact, team, booking, and other core pages.</div>
+    </div>
+    <div id="sitepagesOutput"></div>
   </div>
 
   <!-- SITEMAP -->
@@ -58,13 +127,13 @@
     <div class="hero">
       <div class="hero-eyebrow">Real Crawl-Based Discovery</div>
       <h1>Sitemap <em>Intelligence</em></h1>
-      <p class="hero-sub">Every page visible to visitors AND crawlers. Flags orphaned, noindex, and error pages.</p>
+      <p class="hero-sub">Every page visible to visitors AND crawlers. Flags orphaned, noindex, and error pages. Blog posts shown as a count, not in the tree.</p>
     </div>
     <div class="input-card">
       <div class="input-row">
         <input class="url-input" type="url" id="sitemapUrl" placeholder="https://vetpractice.com"/>
         <div class="input-options">
-          <label class="opt-label"><span>Page limit:</span>
+          <label class="opt-label"><span>Limit:</span>
             <select class="mini-select" id="sitemapPageLimit">
               <option value="100">100 pages</option>
               <option value="200">200 pages</option>
@@ -76,57 +145,9 @@
         </div>
         <button class="btn btn-primary" id="sitemapBtn" onclick="runSitemap()">🗺 BUILD SITEMAP</button>
       </div>
-      <div class="input-hint">Includes ALL pages — blog posts, service pages, team pages, everything. Higher limits take longer.</div>
+      <div class="input-hint">Crawls the entire site. Higher limits take longer — "No limit" may take 10+ minutes for large sites.</div>
     </div>
     <div id="sitemapOutput"></div>
-  </div>
-
-  <!-- BLOG AUDIT -->
-  <div id="viewBlog" class="view">
-    <div class="hero">
-      <div class="hero-eyebrow">Blog Content Intelligence</div>
-      <h1>Blog <em>Audit</em></h1>
-      <p class="hero-sub">Audits every page with /blog/ in the URL. Scores content quality, E-E-A-T, GEO readiness, schema, and more — post by post.</p>
-    </div>
-    <div class="input-card">
-      <div class="input-row">
-        <input class="url-input" type="url" id="blogUrl" placeholder="https://vetpractice.com"/>
-        <div class="input-options">
-          <label class="opt-label"><span>Post limit:</span>
-            <select class="mini-select" id="blogPageLimit">
-              <option value="50">50 posts</option>
-              <option value="100" selected>100 posts</option>
-              <option value="200">200 posts</option>
-              <option value="500">500 posts</option>
-              <option value="9999">No limit</option>
-            </select>
-          </label>
-        </div>
-        <button class="btn btn-primary" id="blogBtn" onclick="runBlogAudit()">📝 AUDIT BLOGS</button>
-      </div>
-      <div class="input-hint">Only crawls pages with /blog/ in the URL. Shows word count, author, publish date, inbound links, and full SEO scores per post.</div>
-    </div>
-    <div id="blogOutput"></div>
-  </div>
-
-  <!-- COMPARE -->
-  <div id="viewCompare" class="view">
-    <div class="hero">
-      <div class="hero-eyebrow">Competitive Intelligence</div>
-      <h1>Competitor <em>Comparison</em></h1>
-      <p class="hero-sub">Compare two vet websites head-to-head across every SEO and GEO dimension.</p>
-    </div>
-    <div class="input-card">
-      <div class="compare-inputs">
-        <input class="url-input" type="url" id="compare1Url" placeholder="https://yourvetpractice.com"/>
-        <span class="vs-badge">VS</span>
-        <input class="url-input" type="url" id="compare2Url" placeholder="https://competitorvet.com"/>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:.75rem">
-        <button class="btn btn-primary" id="compareBtn" onclick="runCompare()">⚔ COMPARE SITES</button>
-      </div>
-    </div>
-    <div id="compareOutput"></div>
   </div>
 
   <!-- HISTORY -->
@@ -147,10 +168,10 @@
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
 <script src="js/history.js"></script>
+<script src="js/overview.js"></script>
 <script src="js/audit.js"></script>
-<script src="js/sitemap.js"></script>
 <script src="js/blog.js"></script>
+<script src="js/sitemap.js"></script>
 <script src="js/pdf.js"></script>
-<script src="js/compare.js"></script>
 </body>
 </html>
