@@ -191,4 +191,4 @@ function getDefaultRecommendation(status) {
   return 'Review this page in Google Search Console to identify any indexation issues.';
 }
 
-function exportSitemapPDF() { alert('PDF export coming soon!'); }
+function exportSitemapPDF() { if(!lastSitemapData){alert("No sitemap data");return;} generatePDF("sitemap",lastSitemapData); }
