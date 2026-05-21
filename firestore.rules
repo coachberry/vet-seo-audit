@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Audits collection — read/write open for now
+    // Lock this down with Firebase Auth when you add user accounts
+    match /audits/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

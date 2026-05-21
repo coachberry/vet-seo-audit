@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VetSEO Auditor — Veterinary SEO & GEO Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🐾</span>
+      <span class="logo-text">VetSEO <em>Auditor</em></span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" id="navAudit" onclick="showView('audit')">SEO Audit</button>
+      <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">Sitemap</button>
+      <button class="nav-btn" id="navCompare" onclick="showView('compare')">Compare</button>
+      <button class="nav-btn" id="navHistory" onclick="showView('history')">History</button>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ══════════════════════════════════════════
+       VIEW: SEO AUDIT
+  ══════════════════════════════════════════ -->
+  <div id="viewAudit" class="view active">
+    <div class="hero">
+      <div class="hero-eyebrow">Veterinary SEO & GEO Intelligence</div>
+      <h1>Full-Site <em>SEO Audit</em></h1>
+      <p class="hero-sub">Real HTML crawling. Vet-specific schema analysis. Actionable recommendations built for veterinary practices.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="auditUrl" placeholder="https://vetpractice.com"/>
+        <div class="input-options">
+          <label class="opt-label">
+            <input type="checkbox" id="crawlSubpages" checked/> Crawl all pages
+          </label>
+          <label class="opt-label">
+            <span>Page limit:</span>
+            <select class="mini-select" id="pageLimit">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="auditBtn" onclick="runAudit()">⚡ RUN AUDIT</button>
+      </div>
+      <div class="input-hint">Crawls real HTML — meta tags, schema, headings, links, Open Graph, and more.</div>
+    </div>
+    <div id="auditOutput"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VIEW: SITEMAP
+  ══════════════════════════════════════════ -->
+  <div id="viewSitemap" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Real Crawl-Based Discovery</div>
+      <h1>Sitemap <em>Intelligence</em></h1>
+      <p class="hero-sub">Discovers every page visible to visitors AND crawlers. Flags orphaned, noindex, and duplicate pages.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="sitemapUrl" placeholder="https://vetpractice.com"/>
+        <button class="btn btn-primary" id="sitemapBtn" onclick="runSitemap()">🗺 BUILD SITEMAP</button>
+      </div>
+    </div>
+    <div id="sitemapOutput"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VIEW: COMPARE
+  ══════════════════════════════════════════ -->
+  <div id="viewCompare" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Competitive Intelligence</div>
+      <h1>Competitor <em>Comparison</em></h1>
+      <p class="hero-sub">Compare two veterinary websites head-to-head across every SEO and GEO dimension.</p>
+    </div>
+    <div class="input-card">
+      <div class="compare-inputs">
+        <input class="url-input" type="url" id="compare1Url" placeholder="https://yourvetpractice.com"/>
+        <span class="vs-badge">VS</span>
+        <input class="url-input" type="url" id="compare2Url" placeholder="https://competitorvet.com"/>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:.75rem">
+        <button class="btn btn-primary" id="compareBtn" onclick="runCompare()">⚔ COMPARE SITES</button>
+      </div>
+    </div>
+    <div id="compareOutput"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VIEW: HISTORY
+  ══════════════════════════════════════════ -->
+  <div id="viewHistory" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Audit History</div>
+      <h1>Past <em>Reports</em></h1>
+      <p class="hero-sub">All saved audits from Firestore. Track progress over time.</p>
+    </div>
+    <div id="historyOutput">
+      <div class="loader-wrap"><div class="loader-label">Loading history...</div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FIREBASE -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
