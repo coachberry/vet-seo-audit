@@ -19,6 +19,7 @@
       <button class="nav-btn" id="navBlog" onclick="showView('blog')">📝 Blog</button>
       <button class="nav-btn" id="navSitepages" onclick="showView('sitepages')">📄 Site Pages</button>
       <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">🗺 Sitemap</button>
+      <button class="nav-btn" id="navContentmap" onclick="showView('contentmap')">🔗 Content Map</button>
       <button class="nav-btn" id="navHistory" onclick="showView('history')">📋 History</button>
     </nav>
   </div>
@@ -150,6 +151,23 @@
     <div id="sitemapOutput"></div>
   </div>
 
+  <!-- CONTENT MAP -->
+  <div id="viewContentmap" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Internal Linking Intelligence</div>
+      <h1>Content <em>Map</em></h1>
+      <p class="hero-sub">Automatically matches every blog post to its most relevant service page. Export as CSV and send to your web team to add the links.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="contentMapUrl" placeholder="https://vetpractice.com"/>
+        <button class="btn btn-primary" id="contentMapBtn" onclick="runContentMap()">🔗 BUILD CONTENT MAP</button>
+      </div>
+      <div class="input-hint">Crawls entire site, finds all blog posts and service pages, then uses AI to match each blog to its most relevant service page.</div>
+    </div>
+    <div id="contentMapOutput"></div>
+  </div>
+
   <!-- HISTORY -->
   <div id="viewHistory" class="view">
     <div class="hero">
@@ -172,6 +190,7 @@
 <script src="js/audit.js"></script>
 <script src="js/blog.js"></script>
 <script src="js/sitemap.js"></script>
+<script src="js/contentmap.js"></script>
 <script src="js/pdf.js"></script>
 </body>
 </html>

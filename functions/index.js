@@ -3,6 +3,7 @@ const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk');
 const { crawlSite, buildHierarchy } = require('./crawler');
 const { analyzeSite, analyzeSitemap } = require('./analyzer');
+const { analyzeContentMap } = require('./contentmap');
 
 admin.initializeApp();
 
@@ -98,6 +99,10 @@ exports.processAudit = functions
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, coreOnly: true });
         if (crawlData.pages.length > 25) crawlData.pages = crawlData.pages.slice(0, 25);
         result = await analyzeSite(crawlData, client, 'sitepages');
+
+      } else if (job.type === 'contentmap') {
+        const crawlData = await crawlSite(job.url, { pageLimit: 9999, crawlSubpages: true });
+        result = await analyzeContentMap(crawlData, client);
 
       } else if (job.type === 'sitemap') {
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true });
