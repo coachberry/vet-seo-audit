@@ -2,7 +2,7 @@ const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk');
 const { crawlSite, buildHierarchy } = require('./crawler');
-const { analyzeSite, analyzeSitemap, compareAnalysis } = require('./analyzer');
+const { analyzeSite, analyzeSitemap } = require('./analyzer');
 
 admin.initializeApp();
 
@@ -30,7 +30,7 @@ exports.startAudit = functions
       const db = getDB();
       const jobRef = await db.collection('jobs').add({
         url: url || url1, url1: url1 || url, url2: url2 || null,
-        pageLimit: parseInt(pageLimit) || 50,
+        pageLimit: parseInt(pageLimit) || 500,
         crawlSubpages: crawlSubpages !== false,
         type: type || 'overview',
         status: 'pending',
@@ -71,25 +71,27 @@ exports.processAudit = functions
       await snap.ref.update({ status: 'running', startedAt: new Date().toISOString() });
       const client = getAnthropicClient();
       let result;
-      const pageLimit = Math.min(parseInt(job.pageLimit) || 50, 9999);
+      const pageLimit = Math.min(parseInt(job.pageLimit) || 500, 9999);
 
       if (job.type === 'overview') {
-        // Fast signal crawl — no deep page analysis
-        const crawlData = await crawlSite(job.url, { pageLimit: 50, crawlSubpages: true, filterBlogs: false, blogOnly: false });
+        // Crawl entire site — no page limit for overview
+        const crawlData = await crawlSite(job.url, {
+          pageLimit: 9999,
+          crawlSubpages: true,
+          filterBlogs: false,
+          blogOnly: false
+        });
         result = await analyzeOverview(crawlData, client);
 
       } else if (job.type === 'services') {
-        // Only /services/ pages, exclude /blog/
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, servicesOnly: true });
         result = await analyzeSite(crawlData, client, 'services');
 
       } else if (job.type === 'blog') {
-        // Only /blog/ pages
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, blogOnly: true });
         result = await analyzeSite(crawlData, client, 'blog');
 
       } else if (job.type === 'sitepages') {
-        // Everything EXCEPT /services/ and /blog/
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, coreOnly: true });
         result = await analyzeSite(crawlData, client, 'sitepages');
 
@@ -97,38 +99,43 @@ exports.processAudit = functions
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true });
         const sitemapTree = buildHierarchy(crawlData.pages, job.url);
         const maxDepth = crawlData.pages.reduce(function(max, p) {
-          try { var d = new URL(p.url).pathname.split('/').filter(Boolean).length; return d > max ? d : max; } catch(e) { return max; }
+          try { const d = new URL(p.url).pathname.split('/').filter(Boolean).length; return d > max ? d : max; } catch(e) { return max; }
         }, 0);
         const sitemapAnalysis = await analyzeSitemap(crawlData, client);
         const issueMap = {};
-        (sitemapAnalysis.pageIssues || []).forEach(function(i) { if(i&&i.url) issueMap[i.url]=i; });
+        (sitemapAnalysis.pageIssues || []).forEach(function(i) { if(i && i.url) issueMap[i.url] = i; });
         result = {
-          domain: crawlData.domain, totalPages: crawlData.pages.length, maxDepth,
+          domain: crawlData.domain,
+          totalPages: crawlData.pages.length,
+          maxDepth,
           hasRobotsTxt: crawlData.hasRobotsTxt,
-          hasXMLSitemap: !!(crawlData.xmlSitemap&&crawlData.xmlSitemap.found),
-          xmlSitemapUrl: crawlData.xmlSitemap&&crawlData.xmlSitemap.url||null,
-          xmlSitemapUrlCount: (crawlData.xmlSitemap&&crawlData.xmlSitemap.urls&&crawlData.xmlSitemap.urls.length)||0,
+          hasXMLSitemap: !!(crawlData.xmlSitemap && crawlData.xmlSitemap.found),
+          xmlSitemapUrl: (crawlData.xmlSitemap && crawlData.xmlSitemap.url) || null,
+          xmlSitemapUrlCount: (crawlData.xmlSitemap && crawlData.xmlSitemap.urls && crawlData.xmlSitemap.urls.length) || 0,
           sitemapTree,
           pages: crawlData.pages.map(function(p) {
             const issue = issueMap[p.url];
             return {
-              url: p.url, pageTitle: p.pageTitle||'',
-              status: p.isNoindex?'noindex':p.isOrphan?'orphan':p.status>=400?'error':p.status>=300?'redirect':'ok',
-              isOrphan: p.isOrphan||false,
-              issue: issue?issue.issue:null, recommendation: issue?issue.recommendation:null,
-              wordCount: p.wordCount||0, hasSchema: !!(p.schemas&&p.schemas.length>0)
+              url: p.url,
+              pageTitle: p.pageTitle || '',
+              status: p.isNoindex ? 'noindex' : p.isOrphan ? 'orphan' : p.status >= 400 ? 'error' : p.status >= 300 ? 'redirect' : 'ok',
+              isOrphan: p.isOrphan || false,
+              issue: issue ? issue.issue : null,
+              recommendation: issue ? issue.recommendation : null,
+              wordCount: p.wordCount || 0,
+              hasSchema: !!(p.schemas && p.schemas.length > 0)
             };
           }),
-          crawlability: sitemapAnalysis.crawlability||{score:0},
-          urlAnalysis: sitemapAnalysis.urlAnalysis||{strengths:[],issues:[],recommendations:[]},
-          overallReport: sitemapAnalysis.overallReport||''
+          crawlability: sitemapAnalysis.crawlability || { score: 0 },
+          urlAnalysis: sitemapAnalysis.urlAnalysis || { strengths: [], issues: [], recommendations: [] },
+          overallReport: sitemapAnalysis.overallReport || ''
         };
       }
 
       await snap.ref.update({ status: 'complete', result, completedAt: new Date().toISOString() });
       await db.collection('audits').add({
         type: job.type,
-        domain: result.domain||(result.site1&&result.site1.domain)||job.url,
+        domain: result.domain || job.url,
         createdAt: new Date().toISOString(),
         data: result
       });
@@ -139,82 +146,152 @@ exports.processAudit = functions
     }
   });
 
-// Fast overview — no per-page Claude analysis
 async function analyzeOverview(crawlData, client) {
   const { pages, domain, hasRobotsTxt, xmlSitemap } = crawlData;
 
-  // Build signal stats from raw crawl data
+  console.log('[analyzeOverview] pages received:', pages.length);
+
+  // Build rich signal stats from every crawled page
+  const totalPages = pages.length;
+  const blogPages = pages.filter(p => /\/blog\//i.test(p.url || ''));
+  const servicePages = pages.filter(p => /\/services\//i.test(p.url || ''));
+  const corePages = pages.filter(p => !/\/blog\//i.test(p.url || '') && !/\/services\//i.test(p.url || ''));
+
+  const pagesWithSchema = pages.filter(p => p.schemas && p.schemas.length > 0);
+  const pagesNoH1 = pages.filter(p => !p.h1s || p.h1s.length === 0);
+  const pagesNoMeta = pages.filter(p => !p.metaDescription);
+  const pagesNoindex = pages.filter(p => p.isNoindex);
+  const orphanPages = pages.filter(p => p.isOrphan);
+  const pagesHttps = pages.filter(p => p.hasHttps);
+  const pagesWithOGImage = pages.filter(p => p.og && p.og.image);
+  const pagesWithCanonical = pages.filter(p => p.canonical);
+  const thinPages = pages.filter(p => (p.wordCount || 0) < 300 && (p.wordCount || 0) > 0);
+
+  const totalWords = pages.reduce((s, p) => s + (p.wordCount || 0), 0);
+  const avgWordCount = totalPages ? Math.round(totalWords / totalPages) : 0;
+
+  // Schema type coverage
+  const allSchemaTypes = new Set();
+  pages.forEach(p => (p.schemaTypes || []).forEach(t => allSchemaTypes.add(t)));
+
+  // Sample pages for context (mix of types)
+  const sampleCore = corePages.slice(0, 5).map(p => ({ url: p.url, title: p.pageTitle, wordCount: p.wordCount, hasSchema: !!(p.schemas && p.schemas.length), h1: p.h1s && p.h1s[0] || '' }));
+  const sampleService = servicePages.slice(0, 5).map(p => ({ url: p.url, title: p.pageTitle, wordCount: p.wordCount, hasSchema: !!(p.schemas && p.schemas.length) }));
+
   const crawlStats = {
-    totalPages: pages.length,
-    pagesWithSchema: pages.filter(p => p.schemas&&p.schemas.length>0).length,
-    pagesNoH1: pages.filter(p => !p.h1s||p.h1s.length===0).length,
-    pagesNoMeta: pages.filter(p => !p.metaDescription).length,
-    pagesNoindex: pages.filter(p => p.isNoindex).length,
-    orphanPages: pages.filter(p => p.isOrphan).length,
-    pagesHttps: pages.filter(p => p.hasHttps).length,
-    pagesWithOGImage: pages.filter(p => p.og&&p.og.image).length,
-    pagesWithCanonical: pages.filter(p => p.canonical).length,
-    avgWordCount: pages.length ? Math.round(pages.reduce((s,p)=>s+(p.wordCount||0),0)/pages.length) : 0,
-    blogPages: pages.filter(p => /\/blog\//i.test(p.url)).length,
-    servicePages: pages.filter(p => /\/services\//i.test(p.url)).length,
+    totalPages,
+    blogPageCount: blogPages.length,
+    servicePageCount: servicePages.length,
+    corePageCount: corePages.length,
+    pagesWithSchema: pagesWithSchema.length,
+    schemaTypesFound: Array.from(allSchemaTypes),
+    pagesNoH1: pagesNoH1.length,
+    pagesNoMeta: pagesNoMeta.length,
+    pagesNoindex: pagesNoindex.length,
+    orphanPages: orphanPages.length,
+    thinContentPages: thinPages.length,
+    pagesHttps: pagesHttps.length,
+    pagesWithOGImage: pagesWithOGImage.length,
+    pagesWithCanonical: pagesWithCanonical.length,
+    avgWordCount,
     hasRobotsTxt,
-    hasXMLSitemap: xmlSitemap&&xmlSitemap.found,
-    xmlSitemapUrlCount: xmlSitemap&&xmlSitemap.urls&&xmlSitemap.urls.length||0,
-    // Sample page titles and URLs for context
-    samplePages: pages.slice(0,15).map(p=>({ url:p.url, title:p.pageTitle, hasSchema:p.schemas&&p.schemas.length>0, wordCount:p.wordCount, h1:p.h1s&&p.h1s[0]||'' }))
+    hasXMLSitemap: !!(xmlSitemap && xmlSitemap.found),
+    xmlSitemapUrlCount: (xmlSitemap && xmlSitemap.urls && xmlSitemap.urls.length) || 0,
+    sampleCorePages: sampleCore,
+    sampleServicePages: sampleService
   };
+
+  console.log('[analyzeOverview] crawlStats built:', JSON.stringify(crawlStats).slice(0, 200));
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 3000,
-    system: `You are a world-class veterinary SEO expert. Based on crawl signal data (no full HTML), score this vet website and provide actionable priorities. Respond ONLY with valid JSON.`,
+    max_tokens: 4000,
+    system: `You are a world-class veterinary SEO and GEO expert with 15+ years experience. You specialize in helping veterinary practices get more traffic, more clients, and better visibility in both traditional search engines and AI tools like ChatGPT, Perplexity, and Google SGE.
+
+Your job is to analyze crawl signal data from a vet website and provide:
+1. Accurate scores (0-100) based on the actual data
+2. Actionable priorities focused on changes that will show results in 1-2 months
+3. A clear 30/60/90 day action plan
+
+Always respond with ONLY valid JSON. No markdown, no explanation.`,
     messages: [{
       role: 'user',
-      content: `Score this veterinary website based on crawl signals. Domain: ${domain}
+      content: `Analyze this veterinary website and provide a complete SEO overview report.
 
-Crawl Stats: ${JSON.stringify(crawlStats)}
+Domain: ${domain}
+Crawl Data: ${JSON.stringify(crawlStats)}
+
+Score each category 0-100 based on the ACTUAL data above. Do NOT return 0 for everything — use the real numbers to calculate honest scores.
+
+Scoring guide:
+- schemaStructuredData: if pagesWithSchema is 0, score 0-10. If 50%+ have schema, score 50+. If they have AnimalHospital/VeterinaryCare schema, score 70+
+- technicalSEO: if all pages are HTTPS, +20 pts. If hasRobotsTxt, +10. If hasXMLSitemap, +10. Deduct for orphans, noindex, missing canonicals
+- contentQuality: base on avgWordCount and thinContentPages ratio
+- localSEO: check for address/phone signals in sample pages, NAP presence
+- overallSEO: weighted average of all categories
 
 Respond with JSON ONLY:
 {
   "scores": {
-    "overallSEO": <0-100>,
-    "localSEO": <0-100>,
-    "schemaStructuredData": <0-100>,
-    "contentQuality": <0-100>,
-    "technicalSEO": <0-100>,
-    "geoAIReadiness": <0-100>,
-    "eeAt": <0-100>
+    "overallSEO": <honest 0-100 based on data>,
+    "localSEO": <honest 0-100>,
+    "schemaStructuredData": <honest 0-100>,
+    "contentQuality": <honest 0-100>,
+    "technicalSEO": <honest 0-100>,
+    "geoAIReadiness": <honest 0-100>,
+    "eeAt": <honest 0-100>
   },
-  "overallFindings": "3-4 paragraph expert assessment",
+  "overallFindings": "3-4 paragraph expert assessment of this specific site based on the data",
   "topPriorities": [
-    { "action": "Specific actionable fix", "impact": "HIGH|MEDIUM|LOW", "effort": "HIGH|MEDIUM|LOW", "category": "Schema|Content|Technical|Local SEO|GEO" }
+    {
+      "action": "Very specific action for THIS site",
+      "impact": "HIGH|MEDIUM|LOW",
+      "effort": "HIGH|MEDIUM|LOW",
+      "category": "Schema|Content|Technical|Local SEO|GEO",
+      "timeToResults": "2-4 weeks|1-2 months|3-6 months"
+    }
   ],
-  "quickWins": ["string — things fixable in under 1 hour"],
-  "localSEOFindings": "paragraph about local SEO signals",
-  "contentStrategy": "paragraph about content recommendations",
-  "schemaStrategy": "paragraph about schema recommendations",
-  "geoAIStrategy": "paragraph about GEO and AI readiness"
+  "quickWins": ["Specific things fixable in under 1 hour that will show results within 30 days"],
+  "thirtyDayPlan": ["Action 1 — complete in first 30 days", "Action 2", "Action 3"],
+  "sixtyDayPlan": ["Action 1 — complete by day 60", "Action 2", "Action 3"],
+  "ninetyDayPlan": ["Action 1 — complete by day 90", "Action 2", "Action 3"],
+  "localSEOFindings": "Specific local SEO assessment for this vet practice",
+  "contentStrategy": "Specific content recommendations for this site",
+  "schemaStrategy": "Specific schema recommendations — which types are missing, which pages need them",
+  "geoAIStrategy": "How to optimize this vet site for ChatGPT, Perplexity, Google SGE, and Gemini"
 }`
     }]
   });
 
+  const raw = msg.content.find(b => b.type === 'text')?.text || '{}';
+  console.log('[analyzeOverview] Claude raw response length:', raw.length);
+
   try {
-    const raw = msg.content.find(b=>b.type==='text')?.text||'{}';
-    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
     return {
-      domain, totalPagesCrawled: pages.length,
-      hasRobotsTxt, hasXMLSitemap: xmlSitemap&&xmlSitemap.found,
+      domain,
+      totalPagesCrawled: totalPages,
+      hasRobotsTxt,
+      hasXMLSitemap: !!(xmlSitemap && xmlSitemap.found),
       crawlStats,
-      scores: parsed.scores||{},
-      overallFindings: parsed.overallFindings||'',
-      topPriorities: parsed.topPriorities||[],
-      quickWins: parsed.quickWins||[],
-      localSEOFindings: parsed.localSEOFindings||'',
-      contentStrategy: parsed.contentStrategy||'',
-      schemaStrategy: parsed.schemaStrategy||'',
-      geoAIStrategy: parsed.geoAIStrategy||''
+      scores: parsed.scores || {},
+      overallFindings: parsed.overallFindings || '',
+      topPriorities: parsed.topPriorities || [],
+      quickWins: parsed.quickWins || [],
+      thirtyDayPlan: parsed.thirtyDayPlan || [],
+      sixtyDayPlan: parsed.sixtyDayPlan || [],
+      ninetyDayPlan: parsed.ninetyDayPlan || [],
+      localSEOFindings: parsed.localSEOFindings || '',
+      contentStrategy: parsed.contentStrategy || '',
+      schemaStrategy: parsed.schemaStrategy || '',
+      geoAIStrategy: parsed.geoAIStrategy || ''
     };
   } catch(e) {
-    return { domain, totalPagesCrawled: pages.length, scores:{}, topPriorities:[], quickWins:[] };
+    console.error('[analyzeOverview] JSON parse error:', e.message, 'raw:', raw.slice(0, 500));
+    return {
+      domain, totalPagesCrawled: totalPages,
+      hasRobotsTxt, hasXMLSitemap: !!(xmlSitemap && xmlSitemap.found),
+      crawlStats, scores: {}, topPriorities: [], quickWins: []
+    };
   }
 }
