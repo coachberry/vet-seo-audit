@@ -149,6 +149,9 @@ exports.processAudit = functions
 
         // Merge raw parsed data with Claude analysis
         if (analyzedPage) {
+          // Log scores to verify Claude returned them
+          console.log('[singlepage] scores from Claude:', JSON.stringify(analyzedPage.scores));
+          console.log('[singlepage] audit keys:', Object.keys(analyzedPage.audit || {}));
           analyzedPage.titleLength = parsedPage.titleLength;
           analyzedPage.metaDescLength = parsedPage.metaDescLength;
           analyzedPage.h1s = parsedPage.h1s;
