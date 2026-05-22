@@ -85,14 +85,18 @@ exports.processAudit = functions
 
       } else if (job.type === 'services') {
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, servicesOnly: true });
+        // Cap pages sent to Claude at 25 to prevent timeout
+        if (crawlData.pages.length > 25) crawlData.pages = crawlData.pages.slice(0, 25);
         result = await analyzeSite(crawlData, client, 'services');
 
       } else if (job.type === 'blog') {
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, blogOnly: true });
+        if (crawlData.pages.length > 25) crawlData.pages = crawlData.pages.slice(0, 25);
         result = await analyzeSite(crawlData, client, 'blog');
 
       } else if (job.type === 'sitepages') {
         const crawlData = await crawlSite(job.url, { pageLimit, crawlSubpages: true, coreOnly: true });
+        if (crawlData.pages.length > 25) crawlData.pages = crawlData.pages.slice(0, 25);
         result = await analyzeSite(crawlData, client, 'sitepages');
 
       } else if (job.type === 'sitemap') {
