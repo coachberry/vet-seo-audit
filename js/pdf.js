@@ -327,7 +327,7 @@ function buildPDF(type, data) {
       var statLines = [
         'Total Pages: '+( cs.totalPages||0)+'  ·  Service Pages: '+(cs.servicePageCount||0)+'  ·  Blog Posts: '+(cs.blogPageCount||0),
         'Pages with Schema: '+(cs.pagesWithSchema||0)+'  ·  Avg Word Count: '+(cs.avgWordCount||0)+'  ·  Thin Content: '+(cs.thinContentPages||0)+' pages',
-        'Orphan Pages: '+(cs.orphanPages||0)+'  ·  Missing H1: '+(cs.pagesNoH1||0)+'  ·  No Meta Desc: '+(cs.pagesNoMeta||0)',
+        'Orphan Pages: '+(cs.orphanPages||0)+'  ·  Missing H1: '+(cs.pagesNoH1||0)+'  ·  No Meta Desc: '+(cs.pagesNoMeta||0),
         'XML Sitemap: '+(data.hasXMLSitemap?'Found':'Missing')+'  ·  robots.txt: '+(data.hasRobotsTxt?'Found':'Missing'),
         'Schema Types Found: '+((cs.schemaTypesFound||[]).join(', ')||'None')
       ];
