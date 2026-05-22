@@ -28,6 +28,7 @@ function runSinglePage() {
 }
 
 function renderSinglePage(data) {
+  console.log('SINGLEPAGE DATA:', JSON.stringify(data).substring(0, 500));
   if (!data || !data.page) {
     document.getElementById('singlePageOutput').innerHTML = '<div class="error-msg">No page data returned.</div>';
     return;
