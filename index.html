@@ -20,6 +20,7 @@
       <button class="nav-btn" id="navSitepages" onclick="showView('sitepages')">📄 Site Pages</button>
       <button class="nav-btn" id="navSitemap" onclick="showView('sitemap')">🗺 Sitemap</button>
       <button class="nav-btn" id="navContentmap" onclick="showView('contentmap')">🔗 Content Map</button>
+      <button class="nav-btn" id="navSinglepage" onclick="showView('singlepage')">🔍 Page Audit</button>
       <button class="nav-btn" id="navHistory" onclick="showView('history')">📋 History</button>
     </nav>
   </div>
@@ -151,6 +152,23 @@
     <div id="sitemapOutput"></div>
   </div>
 
+  <!-- SINGLE PAGE AUDIT -->
+  <div id="viewSinglepage" class="view">
+    <div class="hero">
+      <div class="hero-eyebrow">Single Page Deep Dive</div>
+      <h1>Page <em>Audit</em></h1>
+      <p class="hero-sub">Full audit of any single URL — scores, raw signals, schema, meta tags, Open Graph, E-E-A-T, and priority actions. Perfect for checking a page before and after making changes.</p>
+    </div>
+    <div class="input-card">
+      <div class="input-row">
+        <input class="url-input" type="url" id="singlePageUrl" placeholder="https://vetpractice.com/services/dogs/dog-dental-care-flagstaff"/>
+        <button class="btn btn-primary" id="singlePageBtn" onclick="runSinglePage()">🔍 AUDIT PAGE</button>
+      </div>
+      <div class="input-hint">Enter any full page URL — not just the root domain. Returns in ~30 seconds.</div>
+    </div>
+    <div id="singlePageOutput"></div>
+  </div>
+
   <!-- CONTENT MAP -->
   <div id="viewContentmap" class="view">
     <div class="hero">
@@ -190,6 +208,7 @@
 <script src="js/audit.js"></script>
 <script src="js/blog.js"></script>
 <script src="js/sitemap.js"></script>
+<script src="js/singlepage.js"></script>
 <script src="js/contentmap.js"></script>
 <script src="js/pdf.js"></script>
 </body>

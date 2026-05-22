@@ -100,6 +100,19 @@ exports.processAudit = functions
         if (crawlData.pages.length > 25) crawlData.pages = crawlData.pages.slice(0, 25);
         result = await analyzeSite(crawlData, client, 'sitepages');
 
+      } else if (job.type === 'singlepage') {
+        // Single page audit — fetch and analyze one page only
+        const { crawlSite } = require('./crawler');
+        const { analyzeSite } = require('./analyzer');
+        const singleCrawl = await crawlSite(job.url, { pageLimit: 1, crawlSubpages: false });
+        if (!singleCrawl.pages.length) throw new Error('Could not fetch page: ' + job.url);
+        const singleAnalysis = await analyzeSite(singleCrawl, client);
+        result = {
+          domain: singleCrawl.domain,
+          url: job.url,
+          page: singleAnalysis.pages && singleAnalysis.pages[0] || null
+        };
+
       } else if (job.type === 'contentmap') {
         // For content mapping, crawl with higher concurrency but cap at 500
         // We only need titles and URLs so this is much faster than full analysis
