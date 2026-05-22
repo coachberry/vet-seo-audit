@@ -177,6 +177,7 @@ exports.processAudit = functions
           url: job.url,
           page: analyzedPage || null
         };
+        console.log('[singlepage] result.page exists:', !!analyzedPage, 'scores:', JSON.stringify(analyzedPage && analyzedPage.scores || {}));
 
       } else if (job.type === 'contentmap') {
         // For content mapping, crawl with higher concurrency but cap at 500
