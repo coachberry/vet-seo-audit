@@ -162,10 +162,5 @@ function renderSinglePage(data) {
 
 function exportSinglePagePDF() {
   if (!lastSinglePageData) { alert('No page data to export.'); return; }
-  generatePDF('audit', {
-    domain: lastSinglePageData.domain || '',
-    totalPagesCrawled: 1,
-    siteAverages: lastSinglePageData.page && lastSinglePageData.page.scores || {},
-    pages: [lastSinglePageData.page]
-  });
+  generatePDF('singlepage', lastSinglePageData);
 }
