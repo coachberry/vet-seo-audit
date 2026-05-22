@@ -165,7 +165,7 @@ async function analyzeOverview(crawlData, client) {
   };
 
   const msg = await client.messages.create({
-    model: 'claude-opus-4-5',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 3000,
     system: `You are a world-class veterinary SEO expert. Based on crawl signal data (no full HTML), score this vet website and provide actionable priorities. Respond ONLY with valid JSON.`,
     messages: [{
