@@ -184,7 +184,7 @@ Required schema: ${VET_REQUIRED_SCHEMA.join(', ')}
 Recommended schema: ${VET_RECOMMENDED_SCHEMA.join(', ')}
 
 Respond JSON ONLY:
-{"scores":{"overallSEO":0,"localSEO":0,"schemaStructuredData":0,"geoAIReadiness":0,"contentQuality":0,"technicalSEO":0,"eeAt":0},"audit":{"urlStructure":"string","metadata":"string","openGraph":"string","schema":"string","faqSchema":"string","localSEO":"string","contentEEAT":"string","geoAI":"string","technicalSEO":"string","internalLinking":"string","priorityActions":[{"action":"string","impact":"HIGH|MEDIUM|LOW"},{"action":"string","impact":"HIGH|MEDIUM|LOW"},{"action":"string","impact":"HIGH|MEDIUM|LOW"}]},"missingCriticalSchema":["string"],"recommendedSchema":["string"]}`;
+{"scores":{"overallSEO":0,"localSEO":0,"schemaStructuredData":0,"geoAIReadiness":0,"contentQuality":0,"technicalSEO":0,"eeAt":0},"audit":{"priorityActions":[{"action":"Specific actionable fix #1","impact":"HIGH"},{"action":"Specific actionable fix #2","impact":"HIGH"},{"action":"Specific actionable fix #3","impact":"MEDIUM"},{"action":"Specific actionable fix #4","impact":"MEDIUM"},{"action":"Specific actionable fix #5","impact":"LOW"}],"urlStructure":"string","metadata":"string","openGraph":"string","schema":"string","faqSchema":"string","localSEO":"string","contentEEAT":"string","geoAI":"string","technicalSEO":"string","internalLinking":"string"},"missingCriticalSchema":["string"],"recommendedSchema":["string"]}`;
 }
 
 function buildSystemPrompt() {
