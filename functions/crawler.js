@@ -10,7 +10,8 @@ const CONCURRENCY = 4;
 
 function isBlogUrl(url) {
   try {
-    return /\/blog\//i.test(new URL(url).pathname);
+    var pathname = new URL(url).pathname;
+    return /\/blog(\/|$)/i.test(pathname);
   } catch(e) { return false; }
 }
 
@@ -267,6 +268,10 @@ async function crawlSite(rootUrl, options) {
 
   var visited = new Set();
   var priorityQueue = [normalizedRoot];
+  try {
+    priorityQueue.push(new URL('/blog', rootUrl).href);
+    priorityQueue.push(new URL('/services', rootUrl).href);
+  } catch(e) {}
   var regularQueue = [];
   var sitemapQueue = [];
 
@@ -376,6 +381,3 @@ async function crawlSite(rootUrl, options) {
 function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
 module.exports = { crawlSite: crawlSite, buildHierarchy: buildHierarchy, classifyPage: classifyPage, isBlogUrl: isBlogUrl };
 
-// Patch shouldInclude to handle new modes
-// This is appended — the crawlSite function already has filterBlogs/blogOnly
-// We need to update crawlSite's shouldInclude logic
