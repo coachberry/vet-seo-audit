@@ -19,8 +19,20 @@ async function analyzePage(pageData, client) {
     messages: [{ role: 'user', content: prompt }]
   });
   const raw = msg.content.find(b => b.type === 'text')?.text || '{}';
-  try { return JSON.parse(raw.replace(/```json|```/g, '').trim()); }
-  catch { return {}; }
+  try {
+    let jsonStr = raw.replace(/```json\n?|```/g, '').trim();
+    const fb = jsonStr.indexOf('{'), lb = jsonStr.lastIndexOf('}');
+    if (fb !== -1 && lb !== -1) jsonStr = jsonStr.substring(fb, lb + 1);
+    jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+    const parsed = JSON.parse(jsonStr);
+    if (!parsed.scores || Object.keys(parsed.scores).length === 0) {
+      console.error('[analyzePage] no scores in response, raw length:', raw.length, 'start:', raw.substring(0, 100));
+    }
+    return parsed;
+  } catch(e) {
+    console.error('[analyzePage] parse error:', e.message, 'raw length:', raw.length, 'raw start:', raw.substring(0, 200));
+    return {};
+  }
 }
 
 async function analyzeSite(crawlData, client, mode) {
