@@ -205,7 +205,7 @@ async function analyzeOverview(crawlData, client) {
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 4000,
+    max_tokens: 6000,
     system: `You are a world-class veterinary SEO and GEO expert with 15+ years experience. You specialize in helping veterinary practices get more traffic, more clients, and better visibility in both traditional search engines and AI tools like ChatGPT, Perplexity, and Google SGE.
 
 Your job is to analyze crawl signal data from a vet website and provide:
@@ -267,7 +267,15 @@ Respond with JSON ONLY:
   console.log('[analyzeOverview] Claude raw response length:', raw.length);
 
   try {
-    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    // Strip markdown fences and extract just the JSON object
+    let jsonStr = raw.replace(/```json|```/g, '').trim();
+    // Find the outermost { } to extract valid JSON even if truncated
+    const firstBrace = jsonStr.indexOf('{');
+    const lastBrace = jsonStr.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+    }
+    const parsed = JSON.parse(jsonStr);
     return {
       domain,
       totalPagesCrawled: totalPages,
