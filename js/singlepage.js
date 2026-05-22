@@ -94,6 +94,8 @@ function renderSinglePage(data) {
   }).join('');
 
   // Priority actions
+  console.log('AUDIT KEYS:', Object.keys(page.audit || {}));
+  console.log('PRIORITIES:', JSON.stringify(page.audit && page.audit.priorityActions));
   var priorities = (page.audit && page.audit.priorityActions) || [];
   var priorityHTML = '';
   if (priorities.length) {
