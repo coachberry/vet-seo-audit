@@ -379,5 +379,5 @@ async function crawlSite(rootUrl, options) {
 }
 
 function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
-module.exports = { crawlSite: crawlSite, buildHierarchy: buildHierarchy, classifyPage: classifyPage, isBlogUrl: isBlogUrl };
+module.exports = { crawlSite: crawlSite, buildHierarchy: buildHierarchy, classifyPage: classifyPage, isBlogUrl: isBlogUrl, parsePage: parsePage };
 

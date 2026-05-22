@@ -101,16 +101,80 @@ exports.processAudit = functions
         result = await analyzeSite(crawlData, client, 'sitepages');
 
       } else if (job.type === 'singlepage') {
-        // Single page audit — fetch and analyze one page only
-        const { crawlSite } = require('./crawler');
-        const { analyzeSite } = require('./analyzer');
-        const singleCrawl = await crawlSite(job.url, { pageLimit: 1, crawlSubpages: false });
-        if (!singleCrawl.pages.length) throw new Error('Could not fetch page: ' + job.url);
-        const singleAnalysis = await analyzeSite(singleCrawl, client);
+        // Single page audit — fetch exactly one specific URL
+        const axios = require('axios');
+        const cheerio = require('cheerio');
+        const { parsePage } = require('./crawler');
+
+        // Directly fetch the specific page
+        let pageHtml = '';
+        let pageStatus = 0;
+        try {
+          const res = await axios.get(job.url, {
+            timeout: 15000,
+            headers: {
+              'User-Agent': 'VetSEOAuditor/1.0 (compatible; Googlebot/2.1)',
+              'Accept': 'text/html,application/xhtml+xml',
+              'Cache-Control': 'no-cache'
+            },
+            maxRedirects: 5,
+            validateStatus: function() { return true; }
+          });
+          pageHtml = res.data || '';
+          pageStatus = res.status;
+        } catch(e) {
+          throw new Error('Could not fetch page: ' + e.message);
+        }
+
+        if (!pageHtml) throw new Error('Page returned empty response');
+
+        // Parse the page
+        const parsedPage = parsePage(pageHtml, job.url, pageStatus);
+        parsedPage.isOrphan = false;
+        parsedPage.inboundCount = 0;
+
+        // Build mock crawlData for analyzer
+        const mockCrawlData = {
+          domain: new URL(job.url).hostname.replace(/^www\./, ''),
+          rootUrl: job.url,
+          totalPagesCrawled: 1,
+          hasRobotsTxt: false,
+          xmlSitemap: { found: false, urls: [] },
+          inboundLinks: {},
+          pages: [parsedPage]
+        };
+
+        const singleAnalysis = await analyzeSite(mockCrawlData, client);
+        const analyzedPage = singleAnalysis.pages && singleAnalysis.pages[0];
+
+        // Merge raw parsed data with Claude analysis
+        if (analyzedPage) {
+          analyzedPage.titleLength = parsedPage.titleLength;
+          analyzedPage.metaDescLength = parsedPage.metaDescLength;
+          analyzedPage.h1s = parsedPage.h1s;
+          analyzedPage.h2s = parsedPage.h2s;
+          analyzedPage.og = parsedPage.og;
+          analyzedPage.twitter = parsedPage.twitter;
+          analyzedPage.canonical = parsedPage.canonical;
+          analyzedPage.robotsMeta = parsedPage.robotsMeta;
+          analyzedPage.isNoindex = parsedPage.isNoindex;
+          analyzedPage.hasHttps = parsedPage.hasHttps;
+          analyzedPage.hasViewport = parsedPage.hasViewport;
+          analyzedPage.wordCount = parsedPage.wordCount;
+          analyzedPage.images = parsedPage.images;
+          analyzedPage.imagesWithoutAlt = parsedPage.imagesWithoutAlt;
+          analyzedPage.phones = parsedPage.phones;
+          analyzedPage.hasAddress = parsedPage.hasAddress;
+          analyzedPage.hasHours = parsedPage.hasHours;
+          analyzedPage.hasFAQContent = parsedPage.hasFAQContent;
+          analyzedPage.schemas = parsedPage.schemas;
+          analyzedPage.schemaTypes = parsedPage.schemaTypes;
+        }
+
         result = {
-          domain: singleCrawl.domain,
+          domain: new URL(job.url).hostname.replace(/^www\./, ''),
           url: job.url,
-          page: singleAnalysis.pages && singleAnalysis.pages[0] || null
+          page: analyzedPage || null
         };
 
       } else if (job.type === 'contentmap') {

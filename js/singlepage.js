@@ -48,8 +48,8 @@ function renderSinglePage(data) {
 
   // Raw signals
   var rawSignals = [
-    { label: 'Title', value: page.pageTitle || '(none)', status: page.pageTitle ? (page.titleLength > 60 ? 'warn' : 'ok') : 'error', note: page.titleLength + ' chars' },
-    { label: 'Meta Description', value: page.metaDescription || '(none)', status: page.metaDescription ? (page.metaDescLength > 160 ? 'warn' : 'ok') : 'error', note: page.metaDescLength + ' chars' },
+    { label: 'Title', value: page.pageTitle || '(none)', status: page.pageTitle ? (page.titleLength > 60 ? 'warn' : 'ok') : 'error', note: (page.titleLength || 0) + ' chars' + (page.titleLength > 60 ? ' — too long' : page.titleLength < 30 ? ' — too short' : ' — good') },
+    { label: 'Meta Description', value: page.metaDescription || '(none)', status: page.metaDescription ? (page.metaDescLength > 160 ? 'warn' : 'ok') : 'error', note: (page.metaDescLength || 0) + ' chars' + (page.metaDescLength > 160 ? ' — too long' : page.metaDescLength < 50 ? ' — too short' : ' — good') },
     { label: 'Canonical', value: page.canonical || '(none)', status: page.canonical ? 'ok' : 'warn', note: '' },
     { label: 'Robots Meta', value: page.robotsMeta || '(not set)', status: page.isNoindex ? 'error' : 'ok', note: page.isNoindex ? 'NOINDEX!' : '' },
     { label: 'H1 Tags', value: (page.h1s || []).join(', ') || '(none)', status: !page.h1s || page.h1s.length === 0 ? 'error' : page.h1s.length > 1 ? 'warn' : 'ok', note: (page.h1s || []).length + ' found' },
