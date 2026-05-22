@@ -61,7 +61,8 @@ function renderSinglePage(data) {
     { label: 'OG Image', value: (page.og && page.og.image) ? 'Present' : 'Missing', status: (page.og && page.og.image) ? 'ok' : 'warn', note: '' },
     { label: 'Twitter Card', value: (page.twitter && page.twitter.card) || 'Missing', status: (page.twitter && page.twitter.card) ? 'ok' : 'warn', note: '' },
     { label: 'Images Without Alt', value: (page.imagesWithoutAlt || 0) + ' of ' + (page.images||[]).length, status: (page.imagesWithoutAlt||0) === 0 ? 'ok' : 'warn', note: '' },
-    { label: 'FAQ Content', value: page.hasFAQContent ? 'Detected' : 'Not found', status: page.hasFAQContent ? 'ok' : 'info', note: '' },
+    { label: 'FAQ Content', value: page.hasFAQContent ? 'FAQ headings detected' : 'Not found', status: page.hasFAQContent ? (page.hasFAQSchema ? 'ok' : 'warn') : 'info', note: page.hasFAQContent && !page.hasFAQSchema ? 'Missing FAQPage schema!' : page.hasFAQContent && page.hasFAQSchema ? 'Schema present ✓' : '' },
+    { label: 'FAQPage Schema', value: page.hasFAQSchema ? 'Present' : 'Missing', status: page.hasFAQSchema ? 'ok' : page.hasFAQContent ? 'error' : 'warn', note: page.hasFAQContent && !page.hasFAQSchema ? 'Add FAQPage JSON-LD to get rich snippets' : '' },
     { label: 'Phone Numbers', value: (page.phones||[]).length > 0 ? (page.phones||[]).join(', ') : '(none detected)', status: (page.phones||[]).length > 0 ? 'ok' : 'warn', note: '' },
     { label: 'Address Detected', value: page.hasAddress ? 'Yes' : 'No', status: page.hasAddress ? 'ok' : 'warn', note: '' },
     { label: 'Hours Detected', value: page.hasHours ? 'Yes' : 'No', status: page.hasHours ? 'ok' : 'warn', note: '' }

@@ -167,6 +167,7 @@ exports.processAudit = functions
           analyzedPage.hasAddress = parsedPage.hasAddress;
           analyzedPage.hasHours = parsedPage.hasHours;
           analyzedPage.hasFAQContent = parsedPage.hasFAQContent;
+          analyzedPage.hasFAQSchema = parsedPage.hasFAQSchema;
           analyzedPage.schemas = parsedPage.schemas;
           analyzedPage.schemaTypes = parsedPage.schemaTypes;
         }

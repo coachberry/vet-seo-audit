@@ -145,6 +145,8 @@ Phones: ${JSON.stringify(phones)} | Address: ${page.hasAddress||false} | Hours: 
 Images: ${images.length} total, ${page.imagesWithoutAlt||0} no alt
 Internal Links: ${internalLinks.length} | FAQ Content: ${page.hasFAQContent||false}
 Is Blog: ${page.isBlog||false}${page.author?' | Author: '+page.author:''}${page.publishDate?' | Published: '+page.publishDate:''}
+Has FAQ Content (H2/H3 headings): ${page.hasFAQContent||false}
+Has FAQPage Schema: ${page.hasFAQSchema||false}
 
 Required schema: ${VET_REQUIRED_SCHEMA.join(', ')}
 Recommended schema: ${VET_RECOMMENDED_SCHEMA.join(', ')}

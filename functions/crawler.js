@@ -162,7 +162,36 @@ function parsePage(html, url, status) {
     hasViewport: $('meta[name="viewport"]').length > 0,
     hasHttps: url.startsWith('https://'),
     titleLength: title.length, metaDescLength: metaDesc.length,
-    hasFAQContent: $('[class*="faq"],[id*="faq"],details').length > 0,
+    hasFAQContent: (function() {
+      // Check for explicit FAQ markup
+      var explicitFaq = $('[class*="faq"],[id*="faq"],details').length > 0;
+      // Check for FAQ-style H2/H3 headings (common on GeniusVets and similar platforms)
+      var faqHeading = false;
+      $('h2,h3').each(function(_, el) {
+        var text = $(el).text().toLowerCase();
+        if (text.includes('faq') || text.includes('frequently asked') || text.includes('common question')) {
+          faqHeading = true;
+        }
+      });
+      return explicitFaq || faqHeading;
+    })(),
+    hasFAQSchema: (function() {
+      // Check if FAQPage schema exists
+      var hasFaq = false;
+      $('script[type="application/ld+json"]').each(function(_, el) {
+        try {
+          var json = JSON.parse($(el).html());
+          var items = Array.isArray(json) ? json : [json];
+          items.forEach(function(item) {
+            if (item && (item['@type'] === 'FAQPage')) hasFaq = true;
+            if (item && item['@graph']) item['@graph'].forEach(function(g) {
+              if (g && g['@type'] === 'FAQPage') hasFaq = true;
+            });
+          });
+        } catch(e) {}
+      });
+      return hasFaq;
+    })(),
     isBlog: isBlogUrl(url),
     publishDate: publishDate,
     author: author
