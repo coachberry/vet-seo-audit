@@ -101,7 +101,13 @@ exports.processAudit = functions
         result = await analyzeSite(crawlData, client, 'sitepages');
 
       } else if (job.type === 'contentmap') {
-        const crawlData = await crawlSite(job.url, { pageLimit: 9999, crawlSubpages: true });
+        // For content mapping, crawl with higher concurrency but cap at 500
+        // We only need titles and URLs so this is much faster than full analysis
+        const crawlData = await crawlSite(job.url, {
+          pageLimit: 500,
+          crawlSubpages: true,
+          filterBlogs: false
+        });
         result = await analyzeContentMap(crawlData, client);
 
       } else if (job.type === 'sitemap') {

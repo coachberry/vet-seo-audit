@@ -25,7 +25,7 @@ async function analyzeContentMap(crawlData, client) {
     path: p.url.replace(/https?:\/\/[^\/]+/, '')
   }));
 
-  const BATCH_SIZE = 40;
+  const BATCH_SIZE = 60;
   const allMappings = [];
   const allUnmapped = [];
 
@@ -38,7 +38,7 @@ async function analyzeContentMap(crawlData, client) {
 
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4000,
+      max_tokens: 6000,
       system: 'You are a veterinary SEO expert building internal linking strategies. Match blog posts to service pages. Respond ONLY with valid JSON.',
       messages: [{
         role: 'user',
@@ -74,11 +74,21 @@ Respond JSON ONLY:
       let jsonStr = raw.replace(/```json|```/g, '').trim();
       const fb = jsonStr.indexOf('{'), lb = jsonStr.lastIndexOf('}');
       if (fb !== -1 && lb !== -1) jsonStr = jsonStr.substring(fb, lb + 1);
+      // Fix truncated arrays by closing them
+      jsonStr = jsonStr
+        .replace(/,\s*$/, '')
+        .replace(/,\s*\]/, ']')
+        .replace(/,\s*\}/, '}');
       const parsed = JSON.parse(jsonStr);
       allMappings.push(...(parsed.mappings || []));
       allUnmapped.push(...(parsed.unmapped || []));
     } catch(e) {
-      console.error('[contentMap] batch parse error:', e.message);
+      console.error('[contentMap] batch parse error:', e.message, 'trying partial extraction...');
+      // Try to extract individual valid mapping objects
+      const matches = raw.match(/\{[^{}]*"blogUrl"[^{}]*"serviceUrl"[^{}]*\}/g) || [];
+      matches.forEach(function(m) {
+        try { allMappings.push(JSON.parse(m)); } catch(e2) {}
+      });
     }
 
     // Small delay between batches
