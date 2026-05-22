@@ -32,11 +32,13 @@ async function analyzeSite(crawlData, client, mode) {
     const results = await Promise.all(batch.map(p => analyzePage(p, client)));
     batch.forEach((page, idx) => {
       const r = results[idx] || {};
+      const pageScores = (r && r.scores) ? r.scores : defaultScores();
+      console.log('[analyzer] page scores for', page.url, ':', JSON.stringify(pageScores));
       analyzedPages.push({
         url: page.url || '',
         pageTitle: page.pageTitle || '',
-        scores: r.scores || defaultScores(),
-        audit: r.audit || {},
+        scores: pageScores,
+        audit: (r && r.audit) || {},
         flags: buildFlags(page),
         schemaTypes: page.schemaTypes || [],
         missingSchema: getMissingSchema(page),
@@ -45,7 +47,25 @@ async function analyzeSite(crawlData, client, mode) {
         inboundCount: page.inboundCount || 0,
         publishDate: page.publishDate || '',
         author: page.author || '',
-        metaDescription: page.metaDescription || ''
+        metaDescription: page.metaDescription || '',
+        h1s: page.h1s || [],
+        h2s: page.h2s || [],
+        og: page.og || {},
+        twitter: page.twitter || {},
+        canonical: page.canonical || '',
+        robotsMeta: page.robotsMeta || '',
+        isNoindex: page.isNoindex || false,
+        hasHttps: page.hasHttps || false,
+        hasViewport: page.hasViewport || false,
+        images: page.images || [],
+        imagesWithoutAlt: page.imagesWithoutAlt || 0,
+        phones: page.phones || [],
+        hasAddress: page.hasAddress || false,
+        hasHours: page.hasHours || false,
+        hasFAQContent: page.hasFAQContent || false,
+        hasFAQSchema: page.hasFAQSchema || false,
+        titleLength: page.titleLength || 0,
+        metaDescLength: page.metaDescLength || 0
       });
     });
   }
